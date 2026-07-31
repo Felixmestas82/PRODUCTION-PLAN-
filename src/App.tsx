@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { JobsTable } from './components/JobsTable';
 import { GanttView } from './components/GanttView';
 import { PreconstructionTable } from './components/PreconstructionTable';
 import { EngineeringTable } from './components/EngineeringTable';
+import { LoginScreen } from './components/LoginScreen';
 import { useAppData } from './lib/useAppData';
-import { exportState, parseImportedState } from './lib/storage';
+import { useAuth } from './lib/useAuth';
+import { exportState } from './lib/storage';
 
 type View = 'preconstruction' | 'engineering' | 'jobs' | 'gantt';
 
@@ -16,10 +18,27 @@ const TABS: { id: View; label: string }[] = [
 ];
 
 function App() {
+  const { session, loading: authLoading, signIn, signOut } = useAuth();
+
+  if (authLoading) {
+    return <FullScreenMessage text="Loading…" />;
+  }
+
+  if (!session) {
+    return <LoginScreen onSignIn={signIn} />;
+  }
+
+  return <Dashboard onSignOut={signOut} />;
+}
+
+function Dashboard({ onSignOut }: { onSignOut: () => void }) {
   const {
     preconstruction,
     engineering,
     jobs,
+    loading,
+    error,
+    clearError,
     updatePreconGate,
     addPreconProject,
     deletePreconProject,
@@ -31,32 +50,12 @@ function App() {
     updateDepartment,
     addJob,
     deleteJob,
-    replaceAll,
-    reset,
   } = useAppData();
   const [view, setView] = useState<View>('preconstruction');
-  const fileInput = useRef<HTMLInputElement>(null);
 
-  const handleImportClick = () => fileInput.current?.click();
-
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    file
-      .text()
-      .then((text) => {
-        const next = parseImportedState(text);
-        replaceAll(next);
-      })
-      .catch((err) => alert(`Could not import file: ${(err as Error).message}`));
-    e.target.value = '';
-  };
-
-  const handleReset = () => {
-    if (confirm('Reset everything back to the original spreadsheet import? Local edits will be lost.')) {
-      reset();
-    }
-  };
+  if (loading) {
+    return <FullScreenMessage text="Loading shared data…" />;
+  }
 
   return (
     <div className="flex h-screen flex-col bg-white text-stone-900 dark:bg-stone-950 dark:text-stone-100">
@@ -78,20 +77,21 @@ function App() {
             Export JSON
           </button>
           <button
-            onClick={handleImportClick}
+            onClick={onSignOut}
             className="rounded border border-stone-300 px-2.5 py-1 hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-900"
           >
-            Import JSON
-          </button>
-          <input ref={fileInput} type="file" accept="application/json" onChange={handleImportFile} className="hidden" />
-          <button
-            onClick={handleReset}
-            className="rounded border border-stone-300 px-2.5 py-1 text-red-600 hover:bg-red-50 dark:border-stone-700 dark:text-red-400 dark:hover:bg-red-950/40"
-          >
-            Reset to Import
+            Sign out
           </button>
         </div>
       </header>
+      {error && (
+        <div className="flex items-center gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
+          <span>{error}</span>
+          <button onClick={clearError} className="ml-auto text-xs underline">
+            Dismiss
+          </button>
+        </div>
+      )}
       <main className="min-h-0 flex-1">
         {view === 'preconstruction' && (
           <PreconstructionTable
@@ -121,6 +121,14 @@ function App() {
         )}
         {view === 'gantt' && <GanttView jobs={jobs} />}
       </main>
+    </div>
+  );
+}
+
+function FullScreenMessage({ text }: { text: string }) {
+  return (
+    <div className="flex h-screen items-center justify-center bg-white text-sm text-stone-500 dark:bg-stone-950 dark:text-stone-400">
+      {text}
     </div>
   );
 }

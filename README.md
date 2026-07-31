@@ -4,7 +4,8 @@ A production tracking dashboard for the fabrication shop, built from the real
 job data in `SHOP_PRODUCTION_PLAN_DRAFT.xlsm`. It covers the full pipeline
 from sale to shipped part — Preconstruction → Engineering → Production Gates
 → Shop Floor Gantt — replacing manual spreadsheet gate-tracking with live
-checklists and a department Gantt chart.
+checklists and a department Gantt chart shared live across everyone on the
+team.
 
 ## What it does
 
@@ -81,26 +82,52 @@ unless the linked gate genuinely changes again.
 
 ## Data & persistence
 
-The dashboard loads your real data from `src/data/*_seed.json` (extracted
-directly from the spreadsheet). Any edits you make (gate status, department
-dates) are saved to the browser's local storage automatically, so they
-persist across reloads on the same device/browser.
+Data lives in a shared Supabase (Postgres) project, not the browser — so
+everyone who signs in sees the same live data, and edits sync to everyone
+else automatically over Supabase Realtime. Each job/project/engineering
+item is its own database row, so two people editing different jobs at the
+same time never clobber each other; only a genuine edit to the *same* row
+by two people at once resolves last-write-wins.
 
-- **Export JSON** — download the current state of all four stages as one
-  JSON file (for backup or moving to another browser).
-- **Import JSON** — load a previously exported file, replacing current data.
-- **Reset to Import** — wipe local edits and go back to the original
-  spreadsheet data.
+Access is gated behind a single shared login (Supabase Auth email/password)
+— there's one shared account for the whole team, not individual per-person
+logins. Row Level Security on every table requires that login, so the data
+isn't reachable without it.
 
-There is no backend — everything runs client-side. If you need multiple
-people editing shared, live data, that would require adding a small server
-and database, which isn't part of this build.
+- **Export JSON** — downloads the current shared state as a backup file.
+  This is read-only; there's deliberately no matching "Import" button,
+  since bulk-importing would silently overwrite everyone's live data.
 
-## Running it
+## One-time setup (Supabase + hosting)
+
+This app needs a Supabase project and a static host (Vercel/Netlify) — it
+can't run as a Claude Artifact page, since Artifacts can't hold state
+shared between different people's browsers.
+
+1. **Create a Supabase project** at supabase.com (free tier is enough for
+   this scale). Note the Project URL and, from Settings → API, the anon
+   key and the service_role key.
+2. **Run `supabase/schema.sql`** in the Supabase SQL editor — creates the
+   three tables, Row Level Security policies, and enables Realtime on them.
+3. **Create the shared login**: Authentication → Users → Add user. Any
+   email works; the password is what you share with your team.
+4. **Copy `.env.example` to `.env`** and fill in `VITE_SUPABASE_URL` /
+   `VITE_SUPABASE_ANON_KEY` from step 1.
+5. **Load the real spreadsheet data once**: `SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run migrate:seed`
+   — pushes the 812/834/26 rows extracted from the original spreadsheet
+   into the new tables. Uses the service_role key locally only; never put
+   that key in `.env` or the deployed app.
+6. **Deploy**: import this repo into Vercel (or Netlify), set the build
+   command to `npm run build` and output directory to `dist`, and add
+   `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` as environment variables
+   there too (same values as your `.env`). Every push to this branch
+   redeploys automatically.
+
+## Running it locally
 
 ```bash
 npm install
-npm run dev       # local dev server with hot reload
+npm run dev       # local dev server with hot reload — needs .env set up first
 npm run build      # type-checks and produces a static production build in dist/
 npm run preview    # serve the production build locally
 ```
@@ -117,14 +144,27 @@ npm run preview    # serve the production build locally
   overlapping department activities into separate Gantt rows.
 - `src/lib/link.ts` / `src/lib/autoLink.ts` — job-number matching and the
   cross-stage gate auto-completion (Precon Handoff, Eng Work).
-- `src/lib/storage.ts` / `src/lib/useAppData.ts` — local storage persistence
-  (one bundle covering all four stages) and the React state hook.
+- `src/lib/supabase.ts` — the Supabase client, configured from
+  `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`.
+- `src/lib/db.ts` — per-row read/write/delete against the three tables.
+- `src/lib/realtime.ts` — Supabase Realtime subscriptions that merge other
+  people's edits into local state as they happen.
+- `src/lib/useAuth.ts` / `src/components/LoginScreen.tsx` — the shared-login
+  auth gate.
+- `src/lib/useAppData.ts` — the React state hook: optimistic local updates
+  plus the Supabase read/write/subscribe wiring.
 - `src/components/PreconstructionTable.tsx` / `EngineeringTable.tsx` /
   `JobsTable.tsx` — the editable gate tables per stage.
 - `src/components/GanttView.tsx` — the department Gantt chart.
 - `src/data/preconstruction_seed.json`, `engineering_seed.json`,
   `jobs_seed.json` — the real data extracted from the spreadsheet's
-  `PRECONSTRUCTION`, `ENGINEERING`, and `PRODUCTION PLANNED` sheets.
+  `PRECONSTRUCTION`, `ENGINEERING`, and `PRODUCTION PLANNED` sheets, used
+  only by `scripts/migrate-seed-to-supabase.mjs` (the app itself no longer
+  reads these directly — data comes from Supabase at runtime).
+- `supabase/schema.sql` — the database schema, RLS policies, and Realtime
+  setup to run once in a new Supabase project.
+- `scripts/migrate-seed-to-supabase.mjs` — one-time loader for the seed
+  data into a fresh Supabase project.
 
 ## Extending this
 

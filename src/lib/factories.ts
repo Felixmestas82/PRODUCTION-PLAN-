@@ -40,9 +40,9 @@ export function createJob(overrides: Partial<Job> = {}): Job {
     fabricationStatusLegacy: null,
     notes: null,
     departments: {
-      fabrication: { startDate: null, durationDays: null },
-      paint: { startDate: null, durationDays: null },
-      assembly: { startDate: null, durationDays: null },
+      fabrication: { startDate: null, durationDays: null, skipped: false },
+      paint: { startDate: null, durationDays: null, skipped: false },
+      assembly: { startDate: null, durationDays: null, skipped: false },
     },
     ...overrides,
   };

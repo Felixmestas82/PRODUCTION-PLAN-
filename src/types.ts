@@ -15,6 +15,10 @@ export type DepartmentKey = 'fabrication' | 'paint' | 'assembly';
 export interface DepartmentActivity {
   startDate: string | null; // ISO date
   durationDays: number | null;
+  /** This department doesn't apply to this part (e.g. no paint needed). Optional
+   *  for backward compatibility with data saved before this field existed —
+   *  treat missing/undefined the same as false. */
+  skipped?: boolean;
 }
 
 export type Departments = Record<DepartmentKey, DepartmentActivity>;

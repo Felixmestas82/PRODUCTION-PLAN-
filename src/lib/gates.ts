@@ -47,17 +47,20 @@ export function addDays(iso: string, days: number): string {
 
 export function departmentEndDate(job: Job, dept: DepartmentKey): string | null {
   const activity = job.departments[dept];
+  if (activity.skipped) return null;
   if (!activity.startDate || !activity.durationDays) return activity.startDate;
   return addDays(activity.startDate, activity.durationDays);
 }
 
 /** Can a department date be entered for this job? Fabrication requires ready-for-queue;
- *  paint/assembly require the prior department to have a start date entered. */
+ *  paint/assembly require the prior department to have a start date entered, or to
+ *  have been marked N/A (skipped) for this part. */
 export function departmentUnlocked(job: Job, dept: DepartmentKey): boolean {
   if (dept === 'fabrication') return isReadyForQueue(job);
   const priorIndex = DEPARTMENT_SEQUENCE.indexOf(dept) - 1;
   const prior = DEPARTMENT_SEQUENCE[priorIndex];
-  return Boolean(job.departments[prior]?.startDate);
+  const priorActivity = job.departments[prior];
+  return Boolean(priorActivity?.startDate) || Boolean(priorActivity?.skipped);
 }
 
 export type Stage = 'GATES' | 'QUEUED' | DepartmentKey | 'COMPLETE';
@@ -67,12 +70,24 @@ export function currentStage(job: Job): Stage {
 
   const today = new Date().toISOString().slice(0, 10);
   let stage: Stage = 'QUEUED';
+  let lastStarted: DepartmentKey | null = null;
+
   for (const dept of DEPARTMENT_SEQUENCE) {
     const activity = job.departments[dept];
-    if (!activity.startDate) break;
+    if (activity.skipped) continue; // transparent pass-through, doesn't block or change stage
+    if (!activity.startDate) {
+      lastStarted = null; // blocked here — not complete
+      break;
+    }
     stage = dept;
-    const end = departmentEndDate(job, dept);
-    if (dept === 'assembly' && end && end <= today) {
+    lastStarted = dept;
+  }
+
+  if (lastStarted) {
+    const idx = DEPARTMENT_SEQUENCE.indexOf(lastStarted);
+    const allLaterSkipped = DEPARTMENT_SEQUENCE.slice(idx + 1).every((d) => job.departments[d].skipped);
+    const end = departmentEndDate(job, lastStarted);
+    if (allLaterSkipped && end && end <= today) {
       stage = 'COMPLETE';
     }
   }

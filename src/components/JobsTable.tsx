@@ -180,7 +180,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
       )}
 
       <div className="flex-1 overflow-auto">
-        <table className="w-full min-w-[1440px] border-collapse text-sm">
+        <table className="w-full min-w-[1560px] border-collapse text-sm">
           <thead className="sticky top-0 z-10 bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-400">
             <tr>
               <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Project / Phase</th>
@@ -232,31 +232,55 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
                   {DEPARTMENT_SEQUENCE.map((dept) => {
                     const unlocked = departmentUnlocked(job, dept);
                     const activity = job.departments[dept];
+                    const skipped = Boolean(activity.skipped);
                     return (
                       <td key={dept} className="px-1 py-2" colSpan={2}>
-                        <div className="flex gap-1">
-                          <input
-                            type="date"
-                            disabled={!unlocked}
-                            value={activity.startDate ?? ''}
-                            title={unlocked ? `${DEPARTMENT_LABELS[dept]} start date` : 'Locked until prior stage has a start date'}
-                            onChange={(e) => updateDepartment(job.id, dept, { startDate: e.target.value || null })}
-                            className="w-[130px] rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
-                          />
-                          <input
-                            type="number"
-                            min={0}
-                            disabled={!unlocked}
-                            placeholder="days"
-                            value={activity.durationDays ?? ''}
-                            onChange={(e) =>
-                              updateDepartment(job.id, dept, {
-                                durationDays: e.target.value === '' ? null : Number(e.target.value),
-                              })
-                            }
-                            className="w-14 rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
-                          />
-                        </div>
+                        {skipped ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="rounded border border-stone-500/25 bg-stone-500/10 px-1.5 py-1 text-[10px] font-medium text-stone-500 dark:text-stone-400">
+                              N/A
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateDepartment(job.id, dept, { skipped: false })}
+                              className="text-[11px] text-brand-600 hover:underline dark:text-brand-500"
+                            >
+                              Undo
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="date"
+                              disabled={!unlocked}
+                              value={activity.startDate ?? ''}
+                              title={unlocked ? `${DEPARTMENT_LABELS[dept]} start date` : 'Locked until prior stage has a start date'}
+                              onChange={(e) => updateDepartment(job.id, dept, { startDate: e.target.value || null })}
+                              className="w-[130px] rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
+                            />
+                            <input
+                              type="number"
+                              min={0}
+                              disabled={!unlocked}
+                              placeholder="days"
+                              value={activity.durationDays ?? ''}
+                              onChange={(e) =>
+                                updateDepartment(job.id, dept, {
+                                  durationDays: e.target.value === '' ? null : Number(e.target.value),
+                                })
+                              }
+                              className="w-14 rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
+                            />
+                            <input
+                              type="checkbox"
+                              disabled={!unlocked}
+                              checked={false}
+                              title={`This part doesn't need ${DEPARTMENT_LABELS[dept]} — skip it`}
+                              onChange={() => updateDepartment(job.id, dept, { skipped: true, startDate: null, durationDays: null })}
+                              className="shrink-0 disabled:cursor-not-allowed"
+                            />
+                          </div>
+                        )}
                       </td>
                     );
                   })}

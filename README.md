@@ -1,19 +1,34 @@
 # Shop Production Dashboard
 
 A production tracking dashboard for the fabrication shop, built from the real
-job data in `SHOP_PRODUCTION_PLAN_DRAFT.xlsm` (the `PRODUCTION PLANNED`
-sheet). It replaces manual spreadsheet gate-tracking with a live checklist
-and a department Gantt chart.
+job data in `SHOP_PRODUCTION_PLAN_DRAFT.xlsm`. It covers the full pipeline
+from sale to shipped part — Preconstruction → Engineering → Production Gates
+→ Shop Floor Gantt — replacing manual spreadsheet gate-tracking with live
+checklists and a department Gantt chart.
 
 ## What it does
 
-**Jobs & Gates tab** — every phase/tag line item from the shop's production
-plan (812 of them, across 30 projects), each with:
+The dashboard has four tabs, one per stage of the shop's real workflow:
 
-- The six pre-production gates from the spreadsheet, in order: **Eng Work →
-  Pallet List → Ordered → Metal Onsite → Painted Fasteners → Check-In**.
-  Click a gate badge to cycle it through Not Ready → In Progress → Complete →
-  N/A.
+**Preconstruction tab** — 26 projects at the estimating/design stage, each
+with its own gate checklist: **Estimate Rollout → Contract → Scope → Phase
+Map → Schedule → Means & Methods → Critical Details → Value Strategy →
+Handoff**. A project shows "Handed off" once every gate is Complete or N/A.
+
+**Engineering tab** — 834 shop-drawing line items, each with two gate
+groups pulled straight from the spreadsheet:
+- *Shop Drawing Inputs*: In Eng Gantt, Phase Map/Schedule/Crit Details,
+  Precon Handoff, Project Data Sheet, CAD Files, Draw Started, Submitted
+  Shops, Approved Shops.
+- *Fabrication Documents*: Tag Set/Fab Drawing, Field Verify, TS/FD
+  Revisions, Fld Approval, Release to Prog, Programming, Done Done.
+
+**Production & Gates tab** — 812 phase/tag line items from `PRODUCTION
+PLANNED`, each with:
+
+- The six pre-production gates, in order: **Eng Work → Pallet List →
+  Ordered → Metal Onsite → Painted Fasteners → Check-In**. Click a gate
+  badge to cycle it through Not Ready → In Progress → Complete → N/A.
 - A computed **Ready for Queue** status — true only when every gate is
   Complete or N/A, exactly matching the logic already baked into the
   original spreadsheet (validated against all 812 existing rows with zero
@@ -32,16 +47,31 @@ separate rows within that lane instead of overlapping, with a "capacity
 conflict" flag — that's the shop-floor bottleneck view. Filter by project to
 focus on one job.
 
+Every gate badge across all three gated tabs works the same way: click to
+cycle Not Ready → In Progress → Complete → N/A.
+
+## Why the stages aren't linked record-to-record
+
+The spreadsheet's `PRECONSTRUCTION`, `ENGINEERING`, and `PRODUCTION PLANNED`
+sheets are hand-maintained, and project names don't match cleanly between
+them (e.g. `OAS AMMENITIES EAST` vs `OAS AMENITY EAST`, `SCRIPPS B` vs
+`SCRIPPS ENCINITAS B`). Only ~2 of 30 Production Planned projects have an
+exact-name match in Preconstruction. Rather than guess at fuzzy matches and
+risk silently misreporting a job's real status, each stage is tracked
+independently with its own gate checklist, the same way the original
+workbook keeps them as separate sheets. If you clean up project naming
+going forward, linking them into one longitudinal record per project is a
+natural next step (see "Extending this" below).
+
 ## Data & persistence
 
-The dashboard loads your real job data from `src/data/jobs_seed.json`
-(extracted directly from the spreadsheet's `PRODUCTION PLANNED` sheet). Any
-edits you make (gate status, department dates) are saved to the browser's
-local storage automatically, so they persist across reloads on the same
-device/browser.
+The dashboard loads your real data from `src/data/*_seed.json` (extracted
+directly from the spreadsheet). Any edits you make (gate status, department
+dates) are saved to the browser's local storage automatically, so they
+persist across reloads on the same device/browser.
 
-- **Export JSON** — download the current state of every job as a JSON file
-  (for backup or moving to another browser).
+- **Export JSON** — download the current state of all four stages as one
+  JSON file (for backup or moving to another browser).
 - **Import JSON** — load a previously exported file, replacing current data.
 - **Reset to Import** — wipe local edits and go back to the original
   spreadsheet data.
@@ -61,24 +91,30 @@ npm run preview    # serve the production build locally
 
 ## Project structure
 
-- `src/types.ts` — the `Job` data model (gates, departments, metadata).
-- `src/lib/gates.ts` — gate sequence, readiness logic, department
-  unlock/stage logic.
+- `src/types.ts` — data models for all four stages (`PreconstructionProject`,
+  `EngineeringItem`, `Job`).
+- `src/lib/gateStatus.ts` — shared gate-status helpers (`gateSatisfied`,
+  `allGatesSatisfied`, `blockedGateKeys`) used by every stage.
+- `src/lib/preconstruction.ts` / `src/lib/engineering.ts` / `src/lib/gates.ts`
+  — gate sequences, labels, and readiness logic per stage.
 - `src/lib/ganttLayout.ts` — the bin-packing algorithm that stacks
   overlapping department activities into separate Gantt rows.
-- `src/lib/storage.ts` / `src/lib/useJobs.ts` — local storage persistence
-  and the React state hook.
-- `src/components/JobsTable.tsx` — the editable gates/departments table.
+- `src/lib/storage.ts` / `src/lib/useAppData.ts` — local storage persistence
+  (one bundle covering all four stages) and the React state hook.
+- `src/components/PreconstructionTable.tsx` / `EngineeringTable.tsx` /
+  `JobsTable.tsx` — the editable gate tables per stage.
 - `src/components/GanttView.tsx` — the department Gantt chart.
-- `src/data/jobs_seed.json` — the real job data extracted from the
-  spreadsheet's `PRODUCTION PLANNED` sheet.
+- `src/data/preconstruction_seed.json`, `engineering_seed.json`,
+  `jobs_seed.json` — the real data extracted from the spreadsheet's
+  `PRECONSTRUCTION`, `ENGINEERING`, and `PRODUCTION PLANNED` sheets.
 
 ## Extending this
 
-The gate sequence and department list are defined once in `src/lib/gates.ts`
-(`GATE_SEQUENCE`, `DEPARTMENT_SEQUENCE`) — add or reorder entries there and
-the table/Gantt pick it up automatically. The `PRECONSTRUCTION` and
-`ENGINEERING` sheets in the original workbook have their own earlier gate
-sequences (estimating/design, then shop drawings) that aren't modeled here
-yet; the same pattern would extend to them if you want the dashboard to
-cover the full pipeline from sale to shipped part.
+Each stage's gate sequence is defined once (`PRECON_GATE_SEQUENCE`,
+`SHOP_DRAWING_SEQUENCE` / `FAB_DOCUMENT_SEQUENCE`, `GATE_SEQUENCE` in
+`src/lib/gates.ts`) — add or reorder entries there and the matching table
+picks it up automatically. If project naming gets standardized in the
+spreadsheet, the next step would be adding a `projectId` shared across all
+three seed files so a project's Preconstruction → Engineering → Production
+status can be shown as one connected timeline instead of three independent
+tabs.

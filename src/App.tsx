@@ -1,14 +1,34 @@
 import { useRef, useState } from 'react';
 import { JobsTable } from './components/JobsTable';
 import { GanttView } from './components/GanttView';
-import { useJobs } from './lib/useJobs';
-import { exportJobs, parseImportedJobs } from './lib/storage';
+import { PreconstructionTable } from './components/PreconstructionTable';
+import { EngineeringTable } from './components/EngineeringTable';
+import { useAppData } from './lib/useAppData';
+import { exportState, parseImportedState } from './lib/storage';
 
-type View = 'jobs' | 'gantt';
+type View = 'preconstruction' | 'engineering' | 'jobs' | 'gantt';
+
+const TABS: { id: View; label: string }[] = [
+  { id: 'preconstruction', label: 'Preconstruction' },
+  { id: 'engineering', label: 'Engineering' },
+  { id: 'jobs', label: 'Production & Gates' },
+  { id: 'gantt', label: 'Gantt' },
+];
 
 function App() {
-  const { jobs, updateGate, updateDepartment, replaceAll, reset } = useJobs();
-  const [view, setView] = useState<View>('jobs');
+  const {
+    preconstruction,
+    engineering,
+    jobs,
+    updatePreconGate,
+    updateShopDrawingGate,
+    updateFabDocumentGate,
+    updateGate,
+    updateDepartment,
+    replaceAll,
+    reset,
+  } = useAppData();
+  const [view, setView] = useState<View>('preconstruction');
   const fileInput = useRef<HTMLInputElement>(null);
 
   const handleImportClick = () => fileInput.current?.click();
@@ -19,7 +39,7 @@ function App() {
     file
       .text()
       .then((text) => {
-        const next = parseImportedJobs(text);
+        const next = parseImportedState(text);
         replaceAll(next);
       })
       .catch((err) => alert(`Could not import file: ${(err as Error).message}`));
@@ -27,7 +47,7 @@ function App() {
   };
 
   const handleReset = () => {
-    if (confirm('Reset all jobs back to the original spreadsheet import? Local edits will be lost.')) {
+    if (confirm('Reset everything back to the original spreadsheet import? Local edits will be lost.')) {
       reset();
     }
   };
@@ -37,16 +57,15 @@ function App() {
       <header className="flex items-center gap-4 border-b border-gray-200 px-4 py-3 dark:border-gray-800">
         <h1 className="text-base font-semibold">Shop Production Dashboard</h1>
         <nav className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-900">
-          <TabButton active={view === 'jobs'} onClick={() => setView('jobs')}>
-            Jobs &amp; Gates
-          </TabButton>
-          <TabButton active={view === 'gantt'} onClick={() => setView('gantt')}>
-            Gantt
-          </TabButton>
+          {TABS.map((tab) => (
+            <TabButton key={tab.id} active={view === tab.id} onClick={() => setView(tab.id)}>
+              {tab.label}
+            </TabButton>
+          ))}
         </nav>
         <div className="ml-auto flex gap-2 text-sm">
           <button
-            onClick={() => exportJobs(jobs)}
+            onClick={() => exportState({ preconstruction, engineering, jobs })}
             className="rounded border border-gray-300 px-2.5 py-1 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
           >
             Export JSON
@@ -67,11 +86,18 @@ function App() {
         </div>
       </header>
       <main className="min-h-0 flex-1">
-        {view === 'jobs' ? (
-          <JobsTable jobs={jobs} updateGate={updateGate} updateDepartment={updateDepartment} />
-        ) : (
-          <GanttView jobs={jobs} />
+        {view === 'preconstruction' && (
+          <PreconstructionTable projects={preconstruction} updateGate={updatePreconGate} />
         )}
+        {view === 'engineering' && (
+          <EngineeringTable
+            items={engineering}
+            updateShopDrawingGate={updateShopDrawingGate}
+            updateFabDocumentGate={updateFabDocumentGate}
+          />
+        )}
+        {view === 'jobs' && <JobsTable jobs={jobs} updateGate={updateGate} updateDepartment={updateDepartment} />}
+        {view === 'gantt' && <GanttView jobs={jobs} />}
       </main>
     </div>
   );

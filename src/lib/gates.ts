@@ -1,6 +1,9 @@
-import type { DepartmentKey, GateKey, GateStatus, Job } from '../types';
+import type { DepartmentKey, ProductionGateKey, Job } from '../types';
+import { allGatesSatisfied, blockedGateKeys } from './gateStatus';
 
-export const GATE_SEQUENCE: GateKey[] = [
+export { GATE_STATUS_LABELS, gateSatisfied } from './gateStatus';
+
+export const GATE_SEQUENCE: ProductionGateKey[] = [
   'engWork',
   'palletList',
   'ordered',
@@ -9,20 +12,13 @@ export const GATE_SEQUENCE: GateKey[] = [
   'checkIn',
 ];
 
-export const GATE_LABELS: Record<GateKey, string> = {
+export const GATE_LABELS: Record<ProductionGateKey, string> = {
   engWork: 'Eng Work',
   palletList: 'Pallet List',
   ordered: 'Ordered',
   metalOnsite: 'Metal Onsite',
   paintedFasteners: 'Painted Fasteners',
   checkIn: 'Check-In',
-};
-
-export const GATE_STATUS_LABELS: Record<GateStatus, string> = {
-  COMPLETE: 'Complete',
-  IN_PROGRESS: 'In Progress',
-  NOT_READY: 'Not Ready',
-  N_A: 'N/A',
 };
 
 export const DEPARTMENT_SEQUENCE: DepartmentKey[] = ['fabrication', 'paint', 'assembly'];
@@ -33,19 +29,14 @@ export const DEPARTMENT_LABELS: Record<DepartmentKey, string> = {
   assembly: 'Assembly',
 };
 
-/** A gate satisfies the "ready for queue" requirement when complete or not applicable. */
-export function gateSatisfied(status: GateStatus): boolean {
-  return status === 'COMPLETE' || status === 'N_A';
-}
-
 /** Every gate must be COMPLETE or N/A before a job can enter the production queue. */
 export function isReadyForQueue(job: Job): boolean {
-  return GATE_SEQUENCE.every((key) => gateSatisfied(job.gates[key]));
+  return allGatesSatisfied(job.gates, GATE_SEQUENCE);
 }
 
 /** Gates still blocking a job from being ready for the queue, in sequence order. */
-export function blockedGates(job: Job): GateKey[] {
-  return GATE_SEQUENCE.filter((key) => !gateSatisfied(job.gates[key]));
+export function blockedGates(job: Job): ProductionGateKey[] {
+  return blockedGateKeys(job.gates, GATE_SEQUENCE);
 }
 
 export function addDays(iso: string, days: number): string {

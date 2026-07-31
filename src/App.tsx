@@ -11,7 +11,7 @@ type View = 'preconstruction' | 'engineering' | 'jobs' | 'gantt';
 const TABS: { id: View; label: string }[] = [
   { id: 'preconstruction', label: 'Preconstruction' },
   { id: 'engineering', label: 'Engineering' },
-  { id: 'jobs', label: 'Production & Gates' },
+  { id: 'jobs', label: 'Production' },
   { id: 'gantt', label: 'Gantt' },
 ];
 

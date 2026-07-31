@@ -9,6 +9,7 @@ import type {
   PreconstructionProject,
   ShopDrawingGateKey,
 } from '../types';
+import { precheckEngWork, precheckPreconHandoff, syncEngineeringFromPrecon, syncProductionFromEngineering } from './autoLink';
 import { createEngineeringItem, createJob, createPreconstructionProject } from './factories';
 import { type AppState, loadState, resetToSeed, saveState } from './storage';
 
@@ -26,12 +27,13 @@ export function useAppData() {
 
   // Preconstruction
   const updatePreconGate = useCallback((id: string, gateKey: PreconstructionGateKey, status: GateStatus) => {
-    setState((prev) => ({
-      ...prev,
-      preconstruction: prev.preconstruction.map((p) =>
+    setState((prev) => {
+      const preconstruction = prev.preconstruction.map((p) =>
         p.id === id ? { ...p, gates: { ...p.gates, [gateKey]: status } } : p,
-      ),
-    }));
+      );
+      const updatedProject = preconstruction.find((p) => p.id === id)!;
+      return syncEngineeringFromPrecon({ ...prev, preconstruction }, updatedProject);
+    });
   }, []);
 
   const addPreconProject = useCallback((overrides: Partial<PreconstructionProject>) => {
@@ -47,25 +49,33 @@ export function useAppData() {
 
   // Engineering
   const updateShopDrawingGate = useCallback((id: string, gateKey: ShopDrawingGateKey, status: GateStatus) => {
-    setState((prev) => ({
-      ...prev,
-      engineering: prev.engineering.map((i) =>
+    setState((prev) => {
+      const engineering = prev.engineering.map((i) =>
         i.id === id ? { ...i, shopDrawingGates: { ...i.shopDrawingGates, [gateKey]: status } } : i,
-      ),
-    }));
+      );
+      const updatedItem = engineering.find((i) => i.id === id)!;
+      return syncProductionFromEngineering({ ...prev, engineering }, updatedItem);
+    });
   }, []);
 
   const updateFabDocumentGate = useCallback((id: string, gateKey: FabDocumentGateKey, status: GateStatus) => {
-    setState((prev) => ({
-      ...prev,
-      engineering: prev.engineering.map((i) =>
+    setState((prev) => {
+      const engineering = prev.engineering.map((i) =>
         i.id === id ? { ...i, fabDocumentGates: { ...i.fabDocumentGates, [gateKey]: status } } : i,
-      ),
-    }));
+      );
+      const updatedItem = engineering.find((i) => i.id === id)!;
+      return syncProductionFromEngineering({ ...prev, engineering }, updatedItem);
+    });
   }, []);
 
   const addEngineeringItem = useCallback((overrides: Partial<EngineeringItem>) => {
-    setState((prev) => ({ ...prev, engineering: [createEngineeringItem(overrides), ...prev.engineering] }));
+    setState((prev) => {
+      const item = createEngineeringItem(overrides);
+      if (precheckPreconHandoff(prev, item.jobNo)) {
+        item.shopDrawingGates.preconHandoff = 'COMPLETE';
+      }
+      return { ...prev, engineering: [item, ...prev.engineering] };
+    });
   }, []);
 
   const deleteEngineeringItem = useCallback((id: string) => {
@@ -74,7 +84,13 @@ export function useAppData() {
 
   // Jobs (production planned + departments)
   const addJob = useCallback((overrides: Partial<Job>) => {
-    setState((prev) => ({ ...prev, jobs: [createJob(overrides), ...prev.jobs] }));
+    setState((prev) => {
+      const job = createJob(overrides);
+      if (precheckEngWork(prev, job)) {
+        job.gates.engWork = 'COMPLETE';
+      }
+      return { ...prev, jobs: [job, ...prev.jobs] };
+    });
   }, []);
 
   const deleteJob = useCallback((id: string) => {

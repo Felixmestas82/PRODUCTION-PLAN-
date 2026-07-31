@@ -113,6 +113,7 @@ export function PreconstructionTable({ projects, updateGate, addProject, deleteP
               value={form.jobNumber}
               onChange={(e) => setForm({ ...form, jobNumber: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              title="Links this project to matching job numbers in Engineering and Production"
               className="w-28 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>

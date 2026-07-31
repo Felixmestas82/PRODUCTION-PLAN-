@@ -20,7 +20,7 @@ interface Props {
   deleteItem: (id: string) => void;
 }
 
-const BLANK_FORM = { project: '', pm: '', phase: '', tag: '', description: '' };
+const BLANK_FORM = { project: '', jobNo: '', pm: '', phase: '', tag: '', description: '' };
 
 export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocumentGate, addItem, deleteItem }: Props) {
   const [search, setSearch] = useState('');
@@ -33,6 +33,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
     if (!form.project.trim()) return;
     addItem({
       project: form.project.trim(),
+      jobNo: form.jobNo.trim() || null,
       pm: form.pm.trim() || null,
       phase: form.phase.trim() || null,
       tag: form.tag.trim() || null,
@@ -50,7 +51,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
       if (project !== 'ALL' && i.project !== project) return false;
       if (releasedOnly && !isEngineeringComplete(i)) return false;
       if (q) {
-        const haystack = `${i.project} ${i.phase ?? ''} ${i.tag ?? ''} ${i.description ?? ''}`.toLowerCase();
+        const haystack = `${i.project} ${i.jobNo ?? ''} ${i.phase ?? ''} ${i.tag ?? ''} ${i.description ?? ''}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -64,7 +65,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
       <div className="flex flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 dark:border-stone-800 dark:bg-stone-950">
         <input
           type="text"
-          placeholder="Search project, phase, tag, description…"
+          placeholder="Search project, job no., phase, tag, description…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
@@ -107,6 +108,16 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               onChange={(e) => setForm({ ...form, project: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
               className="w-48 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
+            />
+          </Field>
+          <Field label="Job No.">
+            <input
+              type="text"
+              value={form.jobNo}
+              onChange={(e) => setForm({ ...form, jobNo: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              title="Links this line item to the same job number in Preconstruction and Production"
+              className="w-24 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="PM">
@@ -180,7 +191,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
                   <td className="px-3 py-2">
                     <div className="font-medium text-stone-900 dark:text-stone-100">{item.project}</div>
                     <div className="text-xs text-stone-500 dark:text-stone-400">
-                      {item.phase ? `Phase ${item.phase}` : ''} {item.tag ? `· ${item.tag}` : ''}
+                      {item.jobNo ?? '—'} {item.phase ? `· Phase ${item.phase}` : ''} {item.tag ? `· ${item.tag}` : ''}
                     </div>
                   </td>
                   <td className="px-3 py-2 text-stone-600 dark:text-stone-300">{item.pm ?? '—'}</td>

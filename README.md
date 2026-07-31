@@ -23,8 +23,8 @@ groups pulled straight from the spreadsheet:
 - *Fabrication Documents*: Tag Set/Fab Drawing, Field Verify, TS/FD
   Revisions, Fld Approval, Release to Prog, Programming, Done Done.
 
-**Production & Gates tab** — 812 phase/tag line items from `PRODUCTION
-PLANNED`, each with:
+**Production tab** — 812 phase/tag line items from `PRODUCTION PLANNED`,
+each with:
 
 - The six pre-production gates, in order: **Eng Work → Pallet List →
   Ordered → Metal Onsite → Painted Fasteners → Check-In**. Click a gate
@@ -36,9 +36,11 @@ PLANNED`, each with:
 - Date inputs for **Fabrication, Paint, and Assembly** — the shop floor
   departments. Each is locked until the job is allowed to enter it:
   Fabrication unlocks once a job is Ready for Queue; Paint unlocks once
-  Fabrication has a start date; Assembly unlocks once Paint has a start
-  date. This is the enforcement of "the gates that have to happen to get
-  something into production."
+  Fabrication has a start date (or is marked N/A); Assembly unlocks the
+  same way off Paint. A checkbox next to each date field marks that
+  department N/A for parts that don't need it (e.g. no paint on a mill
+  finish part) — checking it unlocks the next department without
+  requiring a date.
 
 **Gantt tab** — every department date you enter shows up as a bar on a
 day-by-day timeline, grouped into Fabrication / Paint / Assembly lanes. When
@@ -50,18 +52,32 @@ focus on one job.
 Every gate badge across all three gated tabs works the same way: click to
 cycle Not Ready → In Progress → Complete → N/A.
 
-## Why the stages aren't linked record-to-record
+## Job number is the link key across stages
 
 The spreadsheet's `PRECONSTRUCTION`, `ENGINEERING`, and `PRODUCTION PLANNED`
-sheets are hand-maintained, and project names don't match cleanly between
-them (e.g. `OAS AMMENITIES EAST` vs `OAS AMENITY EAST`, `SCRIPPS B` vs
-`SCRIPPS ENCINITAS B`). Only ~2 of 30 Production Planned projects have an
-exact-name match in Preconstruction. Rather than guess at fuzzy matches and
-risk silently misreporting a job's real status, each stage is tracked
-independently with its own gate checklist, the same way the original
-workbook keeps them as separate sheets. If you clean up project naming
-going forward, linking them into one longitudinal record per project is a
-natural next step (see "Extending this" below).
+sheets are hand-maintained, and project *names* don't match cleanly between
+them (e.g. `OAS AMMENITIES EAST` vs `OAS AMENITY EAST`). Job numbers are far
+more reliable, so that's what the dashboard links on — every "+ Add" form
+has a **Job No.** field, and matching job numbers drive two automatic gate
+completions:
+
+- **Preconstruction → Engineering**: once a project's every Preconstruction
+  gate is Complete/N/A ("Handed off"), the **Precon Handoff** gate (one of
+  the Shop Drawing Input gates) auto-completes on every Engineering line
+  item with that job number — whether the item already existed or you add
+  it afterward.
+- **Engineering → Production**: once an Engineering line item's every gate
+  (both groups) is Complete/N/A ("Released"), the **Eng Work** gate (the
+  first Production gate) auto-completes on every Production line item with
+  the same job number *and* matching phase/tag — again regardless of which
+  side was created first.
+
+This is reactive, not a one-time backfill — it only fires on gate changes
+and row creation going forward, so it won't retroactively spawn synthetic
+rows across the 812/834/26 rows imported from the original spreadsheet.
+Both auto-completed gates stay regular gate badges — click one to override
+it manually if needed; it just won't get overridden back automatically
+unless the linked gate genuinely changes again.
 
 ## Data & persistence
 
@@ -99,6 +115,8 @@ npm run preview    # serve the production build locally
   — gate sequences, labels, and readiness logic per stage.
 - `src/lib/ganttLayout.ts` — the bin-packing algorithm that stacks
   overlapping department activities into separate Gantt rows.
+- `src/lib/link.ts` / `src/lib/autoLink.ts` — job-number matching and the
+  cross-stage gate auto-completion (Precon Handoff, Eng Work).
 - `src/lib/storage.ts` / `src/lib/useAppData.ts` — local storage persistence
   (one bundle covering all four stages) and the React state hook.
 - `src/components/PreconstructionTable.tsx` / `EngineeringTable.tsx` /
@@ -113,8 +131,7 @@ npm run preview    # serve the production build locally
 Each stage's gate sequence is defined once (`PRECON_GATE_SEQUENCE`,
 `SHOP_DRAWING_SEQUENCE` / `FAB_DOCUMENT_SEQUENCE`, `GATE_SEQUENCE` in
 `src/lib/gates.ts`) — add or reorder entries there and the matching table
-picks it up automatically. If project naming gets standardized in the
-spreadsheet, the next step would be adding a `projectId` shared across all
-three seed files so a project's Preconstruction → Engineering → Production
-status can be shown as one connected timeline instead of three independent
-tabs.
+picks it up automatically. The cross-stage linking in `src/lib/autoLink.ts`
+only wires two gates (Precon Handoff, Eng Work); if you want other gates to
+sync the same way, or want a full merged timeline view per job number
+instead of three separate tabs, that's the file to extend.

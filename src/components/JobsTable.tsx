@@ -26,7 +26,7 @@ interface Props {
   deleteJob: (id: string) => void;
 }
 
-const BLANK_FORM = { project: '', pm: '', phase: '', tag: '', needBy: '' };
+const BLANK_FORM = { project: '', jobNo: '', pm: '', phase: '', tag: '', needBy: '' };
 
 export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJob }: Props) {
   const [search, setSearch] = useState('');
@@ -49,7 +49,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
       if (pm !== 'ALL' && j.pm !== pm) return false;
       if (readyOnly && !isReadyForQueue(j)) return false;
       if (q) {
-        const haystack = `${j.project} ${j.phase ?? ''} ${j.tag ?? ''} ${j.scope ?? ''} ${j.material ?? ''}`.toLowerCase();
+        const haystack = `${j.project} ${j.jobNo ?? ''} ${j.phase ?? ''} ${j.tag ?? ''} ${j.scope ?? ''} ${j.material ?? ''}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -62,6 +62,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
     if (!form.project.trim()) return;
     addJob({
       project: form.project.trim(),
+      jobNo: form.jobNo.trim() || null,
       pm: form.pm.trim() || null,
       phase: form.phase.trim() || null,
       tag: form.tag.trim() || null,
@@ -76,7 +77,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
       <div className="flex flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 dark:border-stone-800 dark:bg-stone-950">
         <input
           type="text"
-          placeholder="Search project, phase, tag, scope…"
+          placeholder="Search project, job no., phase, tag, scope…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
@@ -131,6 +132,16 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               onChange={(e) => setForm({ ...form, project: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
               className="w-48 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
+            />
+          </Field>
+          <Field label="Job No.">
+            <input
+              type="text"
+              value={form.jobNo}
+              onChange={(e) => setForm({ ...form, jobNo: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              title="Links this line item to the same job number in Preconstruction and Engineering"
+              className="w-24 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="PM">
@@ -207,7 +218,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
                   <td className="px-3 py-2">
                     <div className="font-medium text-stone-900 dark:text-stone-100">{job.project}</div>
                     <div className="text-xs text-stone-500 dark:text-stone-400">
-                      {job.phase ? `Phase ${job.phase}` : ''} {job.tag ? `· ${job.tag}` : ''}
+                      {job.jobNo ?? '—'} {job.phase ? `· Phase ${job.phase}` : ''} {job.tag ? `· ${job.tag}` : ''}
                     </div>
                   </td>
                   <td className="px-3 py-2 text-stone-600 dark:text-stone-300">{job.pm ?? '—'}</td>

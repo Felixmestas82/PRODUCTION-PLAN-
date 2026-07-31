@@ -59,10 +59,11 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-      <header className="flex items-center gap-4 border-b border-gray-200 px-4 py-3 dark:border-gray-800">
+    <div className="flex h-screen flex-col bg-white text-stone-900 dark:bg-stone-950 dark:text-stone-100">
+      <div className="h-1 shrink-0 bg-gradient-to-r from-brand-gold via-brand-500 to-brand-700" />
+      <header className="flex items-center gap-4 border-b border-stone-200 px-4 py-3 dark:border-stone-800">
         <h1 className="text-base font-semibold">Shop Production Dashboard</h1>
-        <nav className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-900">
+        <nav className="flex gap-1 rounded-lg bg-stone-100 p-1 dark:bg-stone-900">
           {TABS.map((tab) => (
             <TabButton key={tab.id} active={view === tab.id} onClick={() => setView(tab.id)}>
               {tab.label}
@@ -72,20 +73,20 @@ function App() {
         <div className="ml-auto flex gap-2 text-sm">
           <button
             onClick={() => exportState({ preconstruction, engineering, jobs })}
-            className="rounded border border-gray-300 px-2.5 py-1 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
+            className="rounded border border-stone-300 px-2.5 py-1 hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-900"
           >
             Export JSON
           </button>
           <button
             onClick={handleImportClick}
-            className="rounded border border-gray-300 px-2.5 py-1 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900"
+            className="rounded border border-stone-300 px-2.5 py-1 hover:bg-stone-50 dark:border-stone-700 dark:hover:bg-stone-900"
           >
             Import JSON
           </button>
           <input ref={fileInput} type="file" accept="application/json" onChange={handleImportFile} className="hidden" />
           <button
             onClick={handleReset}
-            className="rounded border border-gray-300 px-2.5 py-1 text-red-600 hover:bg-red-50 dark:border-gray-700 dark:text-red-400 dark:hover:bg-red-950/40"
+            className="rounded border border-stone-300 px-2.5 py-1 text-red-600 hover:bg-red-50 dark:border-stone-700 dark:text-red-400 dark:hover:bg-red-950/40"
           >
             Reset to Import
           </button>
@@ -138,8 +139,8 @@ function TabButton({
       onClick={onClick}
       className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
         active
-          ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100'
-          : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+          ? 'bg-brand-600 text-white shadow-sm dark:bg-brand-500'
+          : 'text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
       }`}
     >
       {children}

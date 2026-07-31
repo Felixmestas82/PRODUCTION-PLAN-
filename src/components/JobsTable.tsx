@@ -73,18 +73,18 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
+      <div className="flex flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 dark:border-stone-800 dark:bg-stone-950">
         <input
           type="text"
           placeholder="Search project, phase, tag, scope…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="w-64 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
         />
         <select
           value={project}
           onChange={(e) => setProject(e.target.value)}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
         >
           <option value="ALL">All projects ({projects.length})</option>
           {projects.map((p) => (
@@ -96,7 +96,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
         <select
           value={pm}
           onChange={(e) => setPm(e.target.value)}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
         >
           <option value="ALL">All PMs</option>
           {pms.map((p) => (
@@ -105,24 +105,24 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+        <label className="flex items-center gap-1.5 text-sm text-stone-600 dark:text-stone-400">
           <input type="checkbox" checked={readyOnly} onChange={(e) => setReadyOnly(e.target.checked)} />
           Ready for queue only
         </label>
         <button
           type="button"
           onClick={() => setShowAddForm((v) => !v)}
-          className="rounded border border-gray-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+          className="rounded border border-stone-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800"
         >
           {showAddForm ? 'Cancel' : '+ Add Job'}
         </button>
-        <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+        <div className="ml-auto text-sm text-stone-500 dark:text-stone-400">
           Showing {filtered.length} of {jobs.length} line items · {readyCount} ready for queue
         </div>
       </div>
 
       {showAddForm && (
-        <div className="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex flex-wrap items-end gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 dark:border-stone-800 dark:bg-stone-900">
           <Field label="Project *">
             <input
               autoFocus
@@ -130,7 +130,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               value={form.project}
               onChange={(e) => setForm({ ...form, project: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-48 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-48 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="PM">
@@ -139,7 +139,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               value={form.pm}
               onChange={(e) => setForm({ ...form, pm: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-20 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-20 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Phase">
@@ -148,7 +148,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               value={form.phase}
               onChange={(e) => setForm({ ...form, phase: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-24 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-24 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Tag / description">
@@ -157,7 +157,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               value={form.tag}
               onChange={(e) => setForm({ ...form, tag: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-56 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-56 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Need by">
@@ -165,14 +165,14 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               type="date"
               value={form.needBy}
               onChange={(e) => setForm({ ...form, needBy: e.target.value })}
-              className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <button
             type="button"
             disabled={!form.project.trim()}
             onClick={submitAdd}
-            className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+            className="rounded bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-brand-500 dark:hover:bg-brand-600"
           >
             Add job
           </button>
@@ -181,21 +181,21 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
 
       <div className="flex-1 overflow-auto">
         <table className="w-full min-w-[1440px] border-collapse text-sm">
-          <thead className="sticky top-0 z-10 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-400">
             <tr>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Project / Phase</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">PM</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Need By</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" colSpan={GATE_SEQUENCE.length}>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Project / Phase</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">PM</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Need By</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" colSpan={GATE_SEQUENCE.length}>
                 Pre-Production Gates
               </th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Stage</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Stage</th>
               {DEPARTMENT_SEQUENCE.map((d) => (
-                <th key={d} className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" colSpan={2}>
+                <th key={d} className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" colSpan={2}>
                   {DEPARTMENT_LABELS[d]}
                 </th>
               ))}
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" />
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" />
             </tr>
           </thead>
           <tbody>
@@ -203,15 +203,15 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
               const blocked = blockedGates(job);
               const stage = currentStage(job);
               return (
-                <tr key={job.id} className="border-b border-gray-100 align-top hover:bg-gray-50 dark:border-gray-900 dark:hover:bg-gray-900/50">
+                <tr key={job.id} className="border-b border-stone-100 align-top hover:bg-stone-50 dark:border-stone-900 dark:hover:bg-stone-900/50">
                   <td className="px-3 py-2">
-                    <div className="font-medium text-gray-900 dark:text-gray-100">{job.project}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="font-medium text-stone-900 dark:text-stone-100">{job.project}</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400">
                       {job.phase ? `Phase ${job.phase}` : ''} {job.tag ? `· ${job.tag}` : ''}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{job.pm ?? '—'}</td>
-                  <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{job.needBy ?? '—'}</td>
+                  <td className="px-3 py-2 text-stone-600 dark:text-stone-300">{job.pm ?? '—'}</td>
+                  <td className="px-3 py-2 text-stone-600 dark:text-stone-300">{job.needBy ?? '—'}</td>
                   {GATE_SEQUENCE.map((key) => (
                     <td key={key} className="px-1 py-2">
                       <GateBadge
@@ -224,7 +224,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
                   <td className="px-3 py-2">
                     <StageBadge stage={stage} />
                     {blocked.length > 0 && (
-                      <div className="mt-1 text-[11px] text-gray-400">
+                      <div className="mt-1 text-[11px] text-stone-400">
                         Waiting on: {blocked.map((k) => GATE_LABELS[k]).join(', ')}
                       </div>
                     )}
@@ -241,7 +241,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
                             value={activity.startDate ?? ''}
                             title={unlocked ? `${DEPARTMENT_LABELS[dept]} start date` : 'Locked until prior stage has a start date'}
                             onChange={(e) => updateDepartment(job.id, dept, { startDate: e.target.value || null })}
-                            className="w-[130px] rounded border border-gray-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:disabled:bg-gray-800"
+                            className="w-[130px] rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
                           />
                           <input
                             type="number"
@@ -254,7 +254,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
                                 durationDays: e.target.value === '' ? null : Number(e.target.value),
                               })
                             }
-                            className="w-14 rounded border border-gray-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:disabled:bg-gray-800"
+                            className="w-14 rounded border border-stone-300 bg-white px-1 py-1 text-xs disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:disabled:bg-stone-800"
                           />
                         </div>
                       </td>
@@ -269,7 +269,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-400">No line items match the current filters.</div>
+          <div className="p-8 text-center text-sm text-stone-400">No line items match the current filters.</div>
         )}
       </div>
     </div>
@@ -278,7 +278,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJo
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-gray-500 dark:text-gray-400">
+    <label className="flex flex-col gap-1 text-xs text-stone-500 dark:text-stone-400">
       {label}
       {children}
     </label>

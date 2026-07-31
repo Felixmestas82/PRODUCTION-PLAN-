@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* California Sheet Metal brand palette, pulled from the logo mark:
+   terracotta + gold + bronze skyline shapes. Terracotta is the one accent
+   used for interactive/brand moments; gold appears only in the header
+   stripe. Semantic gate-status colors (emerald/amber/red) are unrelated
+   to this palette and stay as Tailwind's defaults everywhere else. */
+@theme {
+  --color-brand-50: #fbf1ea;
+  --color-brand-100: #f3dcc9;
+  --color-brand-300: #dda97b;
+  --color-brand-500: #b5623b;
+  --color-brand-600: #954e2e;
+  --color-brand-700: #7a3f26;
+  --color-brand-gold: #c9a063;
+}
+
 html, body, #root {
   height: 100%;
 }
@@ -8,4 +23,10 @@ html, body, #root {
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  accent-color: var(--color-brand-500);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 1px;
 }

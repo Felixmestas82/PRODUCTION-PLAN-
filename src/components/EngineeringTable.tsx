@@ -61,18 +61,18 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
+      <div className="flex flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 dark:border-stone-800 dark:bg-stone-950">
         <input
           type="text"
           placeholder="Search project, phase, tag, description…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="w-64 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
         />
         <select
           value={project}
           onChange={(e) => setProject(e.target.value)}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
         >
           <option value="ALL">All projects ({projects.length})</option>
           {projects.map((p) => (
@@ -81,24 +81,24 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+        <label className="flex items-center gap-1.5 text-sm text-stone-600 dark:text-stone-400">
           <input type="checkbox" checked={releasedOnly} onChange={(e) => setReleasedOnly(e.target.checked)} />
           Released to programming only
         </label>
         <button
           type="button"
           onClick={() => setShowAddForm((v) => !v)}
-          className="rounded border border-gray-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+          className="rounded border border-stone-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800"
         >
           {showAddForm ? 'Cancel' : '+ Add Line Item'}
         </button>
-        <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+        <div className="ml-auto text-sm text-stone-500 dark:text-stone-400">
           Showing {filtered.length} of {items.length} line items · {releasedCount} released
         </div>
       </div>
 
       {showAddForm && (
-        <div className="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex flex-wrap items-end gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 dark:border-stone-800 dark:bg-stone-900">
           <Field label="Project *">
             <input
               autoFocus
@@ -106,7 +106,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               value={form.project}
               onChange={(e) => setForm({ ...form, project: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-48 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-48 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="PM">
@@ -115,7 +115,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               value={form.pm}
               onChange={(e) => setForm({ ...form, pm: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-20 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-20 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Phase">
@@ -124,7 +124,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               value={form.phase}
               onChange={(e) => setForm({ ...form, phase: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-24 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-24 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Tag">
@@ -133,7 +133,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               value={form.tag}
               onChange={(e) => setForm({ ...form, tag: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-40 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-40 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <Field label="Description">
@@ -142,14 +142,14 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
-              className="w-56 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+              className="w-56 rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-950"
             />
           </Field>
           <button
             type="button"
             disabled={!form.project.trim()}
             onClick={submitAdd}
-            className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+            className="rounded bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-brand-500 dark:hover:bg-brand-600"
           >
             Add line item
           </button>
@@ -158,32 +158,32 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
 
       <div className="flex-1 overflow-auto">
         <table className="w-full min-w-[2000px] border-collapse text-sm">
-          <thead className="sticky top-0 z-10 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-400">
             <tr>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Project / Phase</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">PM</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" colSpan={SHOP_DRAWING_SEQUENCE.length}>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Project / Phase</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">PM</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" colSpan={SHOP_DRAWING_SEQUENCE.length}>
                 Shop Drawing Inputs
               </th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" colSpan={FAB_DOCUMENT_SEQUENCE.length}>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" colSpan={FAB_DOCUMENT_SEQUENCE.length}>
                 Fabrication Documents
               </th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Status</th>
-              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" />
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800">Status</th>
+              <th className="border-b border-stone-200 px-3 py-2 dark:border-stone-800" />
             </tr>
           </thead>
           <tbody>
             {filtered.map((item) => {
               const stage = engineeringStage(item);
               return (
-                <tr key={item.id} className="border-b border-gray-100 align-top hover:bg-gray-50 dark:border-gray-900 dark:hover:bg-gray-900/50">
+                <tr key={item.id} className="border-b border-stone-100 align-top hover:bg-stone-50 dark:border-stone-900 dark:hover:bg-stone-900/50">
                   <td className="px-3 py-2">
-                    <div className="font-medium text-gray-900 dark:text-gray-100">{item.project}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="font-medium text-stone-900 dark:text-stone-100">{item.project}</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400">
                       {item.phase ? `Phase ${item.phase}` : ''} {item.tag ? `· ${item.tag}` : ''}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{item.pm ?? '—'}</td>
+                  <td className="px-3 py-2 text-stone-600 dark:text-stone-300">{item.pm ?? '—'}</td>
                   {SHOP_DRAWING_SEQUENCE.map((key) => (
                     <td key={key} className="px-1 py-2">
                       <GateBadge
@@ -224,7 +224,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-400">No line items match the current filters.</div>
+          <div className="p-8 text-center text-sm text-stone-400">No line items match the current filters.</div>
         )}
       </div>
     </div>
@@ -233,7 +233,7 @@ export function EngineeringTable({ items, updateShopDrawingGate, updateFabDocume
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-gray-500 dark:text-gray-400">
+    <label className="flex flex-col gap-1 text-xs text-stone-500 dark:text-stone-400">
       {label}
       {children}
     </label>

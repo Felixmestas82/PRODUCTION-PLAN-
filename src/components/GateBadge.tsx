@@ -7,7 +7,7 @@ const STYLES: Record<GateStatus, string> = {
   COMPLETE: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/40',
   IN_PROGRESS: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40',
   NOT_READY: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30',
-  N_A: 'bg-gray-500/10 text-gray-500 dark:text-gray-400 border-gray-500/25',
+  N_A: 'bg-stone-500/10 text-stone-500 dark:text-stone-400 border-stone-500/25',
 };
 
 export function GateBadge({

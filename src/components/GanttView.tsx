@@ -47,7 +47,7 @@ export function GanttView({ jobs }: { jobs: Job[] }) {
     return (
       <div className="flex h-full flex-col">
         <ProjectFilter project={project} setProject={setProject} projects={projects} />
-        <div className="flex flex-1 items-center justify-center p-10 text-center text-sm text-gray-400">
+        <div className="flex flex-1 items-center justify-center p-10 text-center text-sm text-stone-400">
           <div>
             No department dates scheduled yet{project !== 'ALL' ? ` for ${project}` : ''}.
             <br />
@@ -75,13 +75,13 @@ export function GanttView({ jobs }: { jobs: Job[] }) {
       <ProjectFilter project={project} setProject={setProject} projects={projects} />
       <div className="flex-1 overflow-auto">
         <div style={{ width: totalDays * DAY_WIDTH + LABEL_WIDTH }}>
-          <div className="sticky top-0 z-20 flex bg-white dark:bg-gray-950" style={{ marginLeft: LABEL_WIDTH }}>
+          <div className="sticky top-0 z-20 flex bg-white dark:bg-stone-950" style={{ marginLeft: LABEL_WIDTH }}>
             {dayTicks.map((d, i) =>
               i % 7 === 0 ? (
                 <div
                   key={d}
                   style={{ width: DAY_WIDTH * 7 }}
-                  className="shrink-0 border-r border-b border-gray-200 px-1 py-1 text-[10px] text-gray-400 dark:border-gray-800"
+                  className="shrink-0 border-r border-b border-stone-200 px-1 py-1 text-[10px] text-stone-400 dark:border-stone-800"
                 >
                   {d}
                 </div>
@@ -93,8 +93,8 @@ export function GanttView({ jobs }: { jobs: Job[] }) {
             const { rows, rowCount } = packBars(barsByDept[dept]);
             if (rowCount === 0) return null;
             return (
-              <div key={dept} className="border-b border-gray-200 dark:border-gray-800">
-                <div className="sticky left-0 z-10 flex items-center bg-gray-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+              <div key={dept} className="border-b border-stone-200 dark:border-stone-800">
+                <div className="sticky left-0 z-10 flex items-center bg-stone-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-400">
                   {DEPARTMENT_LABELS[dept]}
                   {rowCount > 1 && (
                     <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
@@ -111,7 +111,7 @@ export function GanttView({ jobs }: { jobs: Job[] }) {
                         className={`shrink-0 border-r ${
                           d === todayIso
                             ? 'border-red-400/60 bg-red-500/5'
-                            : 'border-gray-100 dark:border-gray-900'
+                            : 'border-stone-100 dark:border-stone-900'
                         }`}
                       />
                     ))}
@@ -155,12 +155,12 @@ function ProjectFilter({
   projects: string[];
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
-      <label className="text-sm text-gray-500 dark:text-gray-400">Project</label>
+    <div className="flex items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 dark:border-stone-800 dark:bg-stone-950">
+      <label className="text-sm text-stone-500 dark:text-stone-400">Project</label>
       <select
         value={project}
         onChange={(e) => setProject(e.target.value)}
-        className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+        className="rounded border border-stone-300 bg-white px-2 py-1 text-sm dark:border-stone-700 dark:bg-stone-900"
       >
         <option value="ALL">All projects</option>
         {projects.map((p) => (

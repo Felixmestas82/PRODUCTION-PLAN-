@@ -21,10 +21,16 @@ function App() {
     engineering,
     jobs,
     updatePreconGate,
+    addPreconProject,
+    deletePreconProject,
     updateShopDrawingGate,
     updateFabDocumentGate,
+    addEngineeringItem,
+    deleteEngineeringItem,
     updateGate,
     updateDepartment,
+    addJob,
+    deleteJob,
     replaceAll,
     reset,
   } = useAppData();
@@ -87,16 +93,31 @@ function App() {
       </header>
       <main className="min-h-0 flex-1">
         {view === 'preconstruction' && (
-          <PreconstructionTable projects={preconstruction} updateGate={updatePreconGate} />
+          <PreconstructionTable
+            projects={preconstruction}
+            updateGate={updatePreconGate}
+            addProject={addPreconProject}
+            deleteProject={deletePreconProject}
+          />
         )}
         {view === 'engineering' && (
           <EngineeringTable
             items={engineering}
             updateShopDrawingGate={updateShopDrawingGate}
             updateFabDocumentGate={updateFabDocumentGate}
+            addItem={addEngineeringItem}
+            deleteItem={deleteEngineeringItem}
           />
         )}
-        {view === 'jobs' && <JobsTable jobs={jobs} updateGate={updateGate} updateDepartment={updateDepartment} />}
+        {view === 'jobs' && (
+          <JobsTable
+            jobs={jobs}
+            updateGate={updateGate}
+            updateDepartment={updateDepartment}
+            addJob={addJob}
+            deleteJob={deleteJob}
+          />
+        )}
         {view === 'gantt' && <GanttView jobs={jobs} />}
       </main>
     </div>

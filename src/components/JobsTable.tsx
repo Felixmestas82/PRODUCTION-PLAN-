@@ -12,6 +12,7 @@ import {
 } from '../lib/gates';
 import { GateBadge } from './GateBadge';
 import { StageBadge } from './StageBadge';
+import { DeleteButton } from './DeleteButton';
 
 interface Props {
   jobs: Job[];
@@ -21,13 +22,19 @@ interface Props {
     dept: DepartmentKey,
     patch: Partial<Job['departments'][DepartmentKey]>,
   ) => void;
+  addJob: (overrides: Partial<Job>) => void;
+  deleteJob: (id: string) => void;
 }
 
-export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
+const BLANK_FORM = { project: '', pm: '', phase: '', tag: '', needBy: '' };
+
+export function JobsTable({ jobs, updateGate, updateDepartment, addJob, deleteJob }: Props) {
   const [search, setSearch] = useState('');
   const [project, setProject] = useState('ALL');
   const [pm, setPm] = useState('ALL');
   const [readyOnly, setReadyOnly] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState(BLANK_FORM);
 
   const projects = useMemo(() => Array.from(new Set(jobs.map((j) => j.project))).sort(), [jobs]);
   const pms = useMemo(
@@ -50,6 +57,19 @@ export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
   }, [jobs, project, pm, readyOnly, search]);
 
   const readyCount = useMemo(() => jobs.filter(isReadyForQueue).length, [jobs]);
+
+  const submitAdd = () => {
+    if (!form.project.trim()) return;
+    addJob({
+      project: form.project.trim(),
+      pm: form.pm.trim() || null,
+      phase: form.phase.trim() || null,
+      tag: form.tag.trim() || null,
+      needBy: form.needBy || null,
+    });
+    setForm(BLANK_FORM);
+    setShowAddForm(false);
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -89,13 +109,78 @@ export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
           <input type="checkbox" checked={readyOnly} onChange={(e) => setReadyOnly(e.target.checked)} />
           Ready for queue only
         </label>
+        <button
+          type="button"
+          onClick={() => setShowAddForm((v) => !v)}
+          className="rounded border border-gray-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+        >
+          {showAddForm ? 'Cancel' : '+ Add Job'}
+        </button>
         <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
           Showing {filtered.length} of {jobs.length} line items · {readyCount} ready for queue
         </div>
       </div>
 
+      {showAddForm && (
+        <div className="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+          <Field label="Project *">
+            <input
+              autoFocus
+              type="text"
+              value={form.project}
+              onChange={(e) => setForm({ ...form, project: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-48 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="PM">
+            <input
+              type="text"
+              value={form.pm}
+              onChange={(e) => setForm({ ...form, pm: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-20 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="Phase">
+            <input
+              type="text"
+              value={form.phase}
+              onChange={(e) => setForm({ ...form, phase: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-24 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="Tag / description">
+            <input
+              type="text"
+              value={form.tag}
+              onChange={(e) => setForm({ ...form, tag: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-56 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="Need by">
+            <input
+              type="date"
+              value={form.needBy}
+              onChange={(e) => setForm({ ...form, needBy: e.target.value })}
+              className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <button
+            type="button"
+            disabled={!form.project.trim()}
+            onClick={submitAdd}
+            className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+          >
+            Add job
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto">
-        <table className="w-full min-w-[1400px] border-collapse text-sm">
+        <table className="w-full min-w-[1440px] border-collapse text-sm">
           <thead className="sticky top-0 z-10 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-900 dark:text-gray-400">
             <tr>
               <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Project / Phase</th>
@@ -110,6 +195,7 @@ export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
                   {DEPARTMENT_LABELS[d]}
                 </th>
               ))}
+              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" />
             </tr>
           </thead>
           <tbody>
@@ -174,6 +260,9 @@ export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
                       </td>
                     );
                   })}
+                  <td className="px-1 py-2 text-center">
+                    <DeleteButton onDelete={() => deleteJob(job.id)} label={`${job.project}${job.phase ? ' · ' + job.phase : ''}`} />
+                  </td>
                 </tr>
               );
             })}
@@ -184,5 +273,14 @@ export function JobsTable({ jobs, updateGate, updateDepartment }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1 text-xs text-gray-500 dark:text-gray-400">
+      {label}
+      {children}
+    </label>
   );
 }

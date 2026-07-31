@@ -2,15 +2,34 @@ import { useMemo, useState } from 'react';
 import type { GateStatus, PreconstructionGateKey, PreconstructionProject } from '../types';
 import { PRECON_GATE_LABELS, PRECON_GATE_SEQUENCE, isHandedOff, preconBlockedGates } from '../lib/preconstruction';
 import { GateBadge } from './GateBadge';
+import { DeleteButton } from './DeleteButton';
 
 interface Props {
   projects: PreconstructionProject[];
   updateGate: (id: string, gateKey: PreconstructionGateKey, status: GateStatus) => void;
+  addProject: (overrides: Partial<PreconstructionProject>) => void;
+  deleteProject: (id: string) => void;
 }
 
-export function PreconstructionTable({ projects, updateGate }: Props) {
+const BLANK_FORM = { project: '', contractor: '', pm: '', jobNumber: '' };
+
+export function PreconstructionTable({ projects, updateGate, addProject, deleteProject }: Props) {
   const [search, setSearch] = useState('');
   const [handedOffOnly, setHandedOffOnly] = useState<'ALL' | 'HANDED_OFF' | 'IN_PROGRESS'>('ALL');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState(BLANK_FORM);
+
+  const submitAdd = () => {
+    if (!form.project.trim()) return;
+    addProject({
+      project: form.project.trim(),
+      contractor: form.contractor.trim() || null,
+      pm: form.pm.trim() || null,
+      jobNumber: form.jobNumber.trim() || null,
+    });
+    setForm(BLANK_FORM);
+    setShowAddForm(false);
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -46,10 +65,67 @@ export function PreconstructionTable({ projects, updateGate }: Props) {
           <option value="HANDED_OFF">Handed off to Engineering</option>
           <option value="IN_PROGRESS">Still in Preconstruction</option>
         </select>
+        <button
+          type="button"
+          onClick={() => setShowAddForm((v) => !v)}
+          className="rounded border border-gray-300 bg-white px-2.5 py-1 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+        >
+          {showAddForm ? 'Cancel' : '+ Add Project'}
+        </button>
         <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
           Showing {filtered.length} of {projects.length} projects · {handedOffCount} handed off
         </div>
       </div>
+
+      {showAddForm && (
+        <div className="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+          <Field label="Project *">
+            <input
+              autoFocus
+              type="text"
+              value={form.project}
+              onChange={(e) => setForm({ ...form, project: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-48 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="Contractor">
+            <input
+              type="text"
+              value={form.contractor}
+              onChange={(e) => setForm({ ...form, contractor: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-40 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="PM">
+            <input
+              type="text"
+              value={form.pm}
+              onChange={(e) => setForm({ ...form, pm: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-24 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <Field label="Job number">
+            <input
+              type="text"
+              value={form.jobNumber}
+              onChange={(e) => setForm({ ...form, jobNumber: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && submitAdd()}
+              className="w-28 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+          </Field>
+          <button
+            type="button"
+            disabled={!form.project.trim()}
+            onClick={submitAdd}
+            className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+          >
+            Add project
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto">
         <table className="w-full min-w-[1100px] border-collapse text-sm">
@@ -62,6 +138,7 @@ export function PreconstructionTable({ projects, updateGate }: Props) {
                 Preconstruction Gates
               </th>
               <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800">Status</th>
+              <th className="border-b border-gray-200 px-3 py-2 dark:border-gray-800" />
             </tr>
           </thead>
           <tbody>
@@ -105,6 +182,9 @@ export function PreconstructionTable({ projects, updateGate }: Props) {
                       </>
                     )}
                   </td>
+                  <td className="px-1 py-2 text-center">
+                    <DeleteButton onDelete={() => deleteProject(project.id)} label={project.project} />
+                  </td>
                 </tr>
               );
             })}
@@ -115,5 +195,14 @@ export function PreconstructionTable({ projects, updateGate }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1 text-xs text-gray-500 dark:text-gray-400">
+      {label}
+      {children}
+    </label>
   );
 }

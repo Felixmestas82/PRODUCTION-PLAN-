@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { DepartmentKey, FabDocumentGateKey, GateStatus, Job, PreconstructionGateKey, ShopDrawingGateKey } from '../types';
+import type {
+  DepartmentKey,
+  EngineeringItem,
+  FabDocumentGateKey,
+  GateStatus,
+  Job,
+  PreconstructionGateKey,
+  PreconstructionProject,
+  ShopDrawingGateKey,
+} from '../types';
+import { createEngineeringItem, createJob, createPreconstructionProject } from './factories';
 import { type AppState, loadState, resetToSeed, saveState } from './storage';
 
 export function useAppData() {
@@ -24,6 +34,17 @@ export function useAppData() {
     }));
   }, []);
 
+  const addPreconProject = useCallback((overrides: Partial<PreconstructionProject>) => {
+    setState((prev) => ({
+      ...prev,
+      preconstruction: [createPreconstructionProject(overrides), ...prev.preconstruction],
+    }));
+  }, []);
+
+  const deletePreconProject = useCallback((id: string) => {
+    setState((prev) => ({ ...prev, preconstruction: prev.preconstruction.filter((p) => p.id !== id) }));
+  }, []);
+
   // Engineering
   const updateShopDrawingGate = useCallback((id: string, gateKey: ShopDrawingGateKey, status: GateStatus) => {
     setState((prev) => ({
@@ -43,7 +64,23 @@ export function useAppData() {
     }));
   }, []);
 
+  const addEngineeringItem = useCallback((overrides: Partial<EngineeringItem>) => {
+    setState((prev) => ({ ...prev, engineering: [createEngineeringItem(overrides), ...prev.engineering] }));
+  }, []);
+
+  const deleteEngineeringItem = useCallback((id: string) => {
+    setState((prev) => ({ ...prev, engineering: prev.engineering.filter((i) => i.id !== id) }));
+  }, []);
+
   // Jobs (production planned + departments)
+  const addJob = useCallback((overrides: Partial<Job>) => {
+    setState((prev) => ({ ...prev, jobs: [createJob(overrides), ...prev.jobs] }));
+  }, []);
+
+  const deleteJob = useCallback((id: string) => {
+    setState((prev) => ({ ...prev, jobs: prev.jobs.filter((j) => j.id !== id) }));
+  }, []);
+
   const updateGate = useCallback(
     (id: string, gateKey: keyof Job['gates'], status: Job['gates'][keyof Job['gates']]) => {
       setState((prev) => ({
@@ -76,10 +113,16 @@ export function useAppData() {
     engineering: state.engineering,
     jobs: state.jobs,
     updatePreconGate,
+    addPreconProject,
+    deletePreconProject,
     updateShopDrawingGate,
     updateFabDocumentGate,
+    addEngineeringItem,
+    deleteEngineeringItem,
     updateGate,
     updateDepartment,
+    addJob,
+    deleteJob,
     replaceAll,
     reset,
   };
